@@ -30,6 +30,11 @@ function App() {
 
   }
 
+  const handelApiHit = async () => {
+
+    const result = await axios.post('http://localhost:8000/search', {phoneNumber: "7970279927"})
+  }
+
   return (
     <div className={styles.mainContainer}>
       <h1>{message}</h1>
@@ -60,6 +65,8 @@ function App() {
         </div>
 
       </form>
+
+      <p onClick={() => handelApiHit()}>api hit</p>
     </div>
   );
 }
