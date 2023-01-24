@@ -26,6 +26,8 @@ function App() {
 
     console.log("data16", data)
     const ans = await axios.post('http://localhost:8000/createData', { data: data })
+    console.log("res", ans)
+
   }
 
   return (
