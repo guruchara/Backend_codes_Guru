@@ -8,27 +8,13 @@ const mongoose = require('mongoose')
 const app = express();
 
 mongoose.connect('mongodb://127.0.0.1/userInfo')
-    .then(() => console.log("connected")).catch(err => console.log("error", err))
+    .then(() => console.log("Db Connected")).catch(err => console.log("error", err))
 
 app.use(cors());
 // app.use(express.json());
 
-
-
-
-const multer = require('multer');
+const multer = require('multer');  // used for storing image 
 const upload = multer({ dest: 'uploads/' });
-
-// const transporter = nodemailer.createTransport({
-//     host: "smtp.example.com",
-//     port: 587,
-//     secure: false,
-//     auth: {
-//         user: "email@example.com",
-//         pass: "password"
-//     }
-// });
-
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
@@ -71,13 +57,6 @@ app.get('/getSingleUser', async (req, res) => {
 
 app.post('/addUserInfo', upload.single('image'), async (req, res) => {
     const { email, companyName, url, name, batchYear } = req.body;
-    console.log('Email:', email);
-    console.log('Image:', req.file);
-    console.log('companyName', companyName)
-    console.log("url", url)
-    console.log('name', name)
-    console.log('batchYear', batchYear)
-
     const imgUrl = req.file.path
 
     if (!imgUrl) {
@@ -96,13 +75,45 @@ app.post('/addUserInfo', upload.single('image'), async (req, res) => {
     const dataRes = await userDataObj.save();
 
     if (dataRes) {
-
         res.json({ message: 'success' })
     }
-    // else
-    // {
-    //     res.json({err:error})
-    // }
+})
+
+app.post('/editUserInfo', upload.single('image'), async (req, res) => {
+
+    const { email, companyName, url, name, batchYear } = req.body;
+
+    console.log('emailTest:', email);
+    console.log('Image:', req.file || '');
+    console.log('companyName', companyName || '')
+    console.log("url", url || '')
+    console.log('name', name || '')
+    console.log('batchYear', batchYear || 2020)
+
+
+    const result= await UserDetails.findOne({ email:email});
+    console.log("updated",result)
+    let imgPath=''
+
+    if(req.file && req.file.path){
+       imgPath=req.file.path;
+    }
+    result.name=name || result.name;
+    result.companyName=companyName || result.companyName;
+    result.imageUrl=imgPath || result.imageUrl;
+    result.linkedinUrl=url || result.linkedinUrl;
+    result.batchYear=batchYear || result.batchYear;
+    // 6th field is email but user can't change their email 
+
+    const ans= await result.save();
+
+   console.log("ans128",ans)
+
+   let arr=[]
+   arr.push(ans)
+
+    res.json({data:arr,message:'success updated'})
+    console.log("result122",result)
 
 
 })
