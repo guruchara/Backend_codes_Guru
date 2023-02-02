@@ -36,7 +36,8 @@ const studentInfo = new mongoose.Schema({
     batchYear: Number,
     companyName: String,
     imageUrl: String,
-    updated: { type: Date, default: Date.now() }
+    updated: { type: Date, default: Date.now() },
+    approve: Boolean
 })
 
 const UserDetails = mongoose.model('userDetails', studentInfo)
@@ -68,7 +69,8 @@ app.post('/addUserInfo', upload.single('image'), async (req, res) => {
         linkedinUrl: url,
         batchYear: batchYear,
         imageUrl: imgUrl,
-        updated: Date.now()
+        updated: Date.now(),
+        approve: false,
     })
 
     const dataRes = await userDataObj.save();
@@ -124,11 +126,33 @@ app.get('/getPrivateData', async (req, res) => {
             console.log("error", err)
         }
         else {
-           
-            console.log("data12",datas)
+            res.json({ data: datas, message: 'successfully hit' })
+        }
+    })
+})
 
-             res.json({data:datas,message:'successfully hit'})
+app.post('/editPrivate', async (req, res) => {
+    
+    const { approve, reject, email } = req.body;
 
+    if(!email){
+        return
+    }
+    const result = await UserDetails.findOne({ email: email });
+
+    result.approve = req.body.approve || false
+    // result.reject = req.body.reject || false
+
+    const ans = await result.save();
+
+    UserDetails.find({}, function (err, datas) {
+
+        if (err) {
+            console.log("error", err)
+        }
+        else {
+            console.log("privateUpdateData", datas)
+            res.json({ data: datas, message: 'successfully Hitted' })
         }
     })
 })
