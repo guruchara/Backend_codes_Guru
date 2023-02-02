@@ -141,7 +141,6 @@ app.post('/editPrivate', async (req, res) => {
     const result = await UserDetails.findOne({ email: email });
 
     result.approve = req.body.approve || false
-    // result.reject = req.body.reject || false
 
     const ans = await result.save();
 
