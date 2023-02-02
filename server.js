@@ -35,7 +35,8 @@ const studentInfo = new mongoose.Schema({
     },
     batchYear: Number,
     companyName: String,
-    imageUrl: String
+    imageUrl: String,
+    updated: { type: Date, default: Date.now() }
 })
 
 const UserDetails = mongoose.model('userDetails', studentInfo)
@@ -57,11 +58,8 @@ app.get('/getSingleUser', async (req, res) => {
 
 app.post('/addUserInfo', upload.single('image'), async (req, res) => {
     const { email, companyName, url, name, batchYear } = req.body;
-    const imgUrl = req.file.path
+    const imgUrl = req?.file?.path || ''
 
-    if (!imgUrl) {
-        res.json({ message: 'bad request' })
-    }
 
     const userDataObj = new UserDetails({
         name: name,
@@ -70,12 +68,14 @@ app.post('/addUserInfo', upload.single('image'), async (req, res) => {
         linkedinUrl: url,
         batchYear: batchYear,
         imageUrl: imgUrl,
+        updated: Date.now()
     })
 
     const dataRes = await userDataObj.save();
 
     if (dataRes) {
         res.json({ message: 'success' })
+        return
     }
 })
 
@@ -91,31 +91,46 @@ app.post('/editUserInfo', upload.single('image'), async (req, res) => {
     console.log('batchYear', batchYear || 2020)
 
 
-    const result= await UserDetails.findOne({ email:email});
-    console.log("updated",result)
-    let imgPath=''
+    const result = await UserDetails.findOne({ email: email });
+    console.log("updated", result)
+    let imgPath = ''
 
-    if(req.file && req.file.path){
-       imgPath=req.file.path;
+    if (req.file && req.file.path) {
+        imgPath = req.file.path;
     }
-    result.name=name || result.name;
-    result.companyName=companyName || result.companyName;
-    result.imageUrl=imgPath || result.imageUrl;
-    result.linkedinUrl=url || result.linkedinUrl;
-    result.batchYear=batchYear || result.batchYear;
+    result.name = name || result.name;
+    result.companyName = companyName || result.companyName;
+    result.imageUrl = imgPath || result.imageUrl;
+    result.linkedinUrl = url || result.linkedinUrl;
+    result.batchYear = batchYear || result.batchYear;
     // 6th field is email but user can't change their email 
 
-    const ans= await result.save();
+    const ans = await result.save();
 
-   console.log("ans128",ans)
+    console.log("ans128", ans)
 
-   let arr=[]
-   arr.push(ans)
+    let arr = []
+    arr.push(ans)
 
-    res.json({data:arr,message:'success updated'})
-    console.log("result122",result)
+    res.json({ data: arr, message: 'success updated' })
+    console.log("result122", result)
+})
 
+app.get('/getPrivateData', async (req, res) => {
 
+    UserDetails.find({}, function (err, datas) {
+
+        if (err) {
+            console.log("error", err)
+        }
+        else {
+           
+            console.log("data12",datas)
+
+             res.json({data:datas,message:'successfully hit'})
+
+        }
+    })
 })
 
 app.listen(8000, () => {
