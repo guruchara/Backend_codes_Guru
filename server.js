@@ -110,11 +110,6 @@ app.post('/firstTimeUsers', upload.single('image'), async (req, res) => {
     const { email, companyName, url, name, batchYear } = req.body;
     const imgUrl = req?.file?.path || ''
 
-    console.log("113email", email)
-    console.log("113comapany", companyName)
-    console.log("113", name)
-
-
     const firstUserObj = new firstTImeUserDetails({
         name: name,
         email: email,
@@ -127,7 +122,7 @@ app.post('/firstTimeUsers', upload.single('image'), async (req, res) => {
     })
 
     const dataRes = await firstUserObj.save();
-    console.log("130ddddd", dataRes)
+    
     if (dataRes) {
         res.json({ message: 'success' })
         return
@@ -142,16 +137,7 @@ app.post('/editUserInfo', upload.single('image'), async (req, res) => {
 
     const { email, companyName, url, name, batchYear } = req.body;
 
-    console.log('emailTest:', email);
-    console.log('Image:', req.file || '');
-    console.log('companyName', companyName || '')
-    console.log("url", url || '')
-    console.log('name', name || '')
-    console.log('batchYear', batchYear || 2020)
-
-
     const result = await UserDetails.findOne({ email: email });
-    console.log("updated", result)
     let imgPath = ''
 
     if (req.file && req.file.path) {
@@ -166,13 +152,11 @@ app.post('/editUserInfo', upload.single('image'), async (req, res) => {
 
     const ans = await result.save();
 
-    console.log("ans128", ans)
 
     let arr = []
     arr.push(ans)
 
     res.json({ data: arr, message: 'success updated' })
-    console.log("result122", result)
 })
 
 app.get('/getPrivateData', async (req, res) => {
@@ -198,7 +182,6 @@ app.post('/editPrivate', async (req, res) => {
 
     if (req.body.approve) {
         const check = await firstTImeUserDetails.findOne({ email: email });
-        console.log("check203clea", check)
 
         if (!check) {
             return
@@ -206,7 +189,6 @@ app.post('/editPrivate', async (req, res) => {
         check.approve=true
 
         let response = await check.save()
-        // console.log("response206", response)
 
         // distinct and approved data 
         const userDataObj = new UserDetails({
@@ -221,7 +203,6 @@ app.post('/editPrivate', async (req, res) => {
         })
 
         let resss = await userDataObj.save()
-        console.log("resss", resss)
     }
 
     UserDetails.find({}, function (err, datas) {
