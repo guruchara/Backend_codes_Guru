@@ -37,7 +37,8 @@ const studentInfo = new mongoose.Schema({
     companyName: String,
     imageUrl: String,
     updated: { type: Date, default: Date.now() },
-    approve: Boolean
+    approve: Boolean,
+    reject:Boolean
 })
 
 const UserDetails = mongoose.model('userDetails', studentInfo)
@@ -71,6 +72,7 @@ app.post('/addUserInfo', upload.single('image'), async (req, res) => {
         imageUrl: imgUrl,
         updated: Date.now(),
         approve: false,
+        reject:false
     })
 
     const dataRes = await userDataObj.save();
@@ -101,7 +103,8 @@ const firstTimeUser = new mongoose.Schema({
     companyName: String,
     imageUrl: String,
     updated: { type: Date, default: Date.now() },
-    approve: Boolean
+    approve: Boolean,
+    reject:Boolean
 })
 
 const firstTImeUserDetails = mongoose.model('firstTImeUserDetails', firstTimeUser)
@@ -119,10 +122,11 @@ app.post('/firstTimeUsers', upload.single('image'), async (req, res) => {
         imageUrl: imgUrl,
         updated: Date.now(),
         approve: false,
+        reject:false
     })
 
     const dataRes = await firstUserObj.save();
-    
+
     if (dataRes) {
         res.json({ message: 'success' })
         return
@@ -200,6 +204,35 @@ app.post('/editPrivate', async (req, res) => {
             imageUrl: check.imageUrl,
             updated: Date.now(),
             approve: true,
+            reject:false
+        })
+
+        let resss = await userDataObj.save()
+    }
+
+    else
+    {
+        const check = await firstTImeUserDetails.findOne({ email: email });
+
+        if (!check) {
+            return
+        }
+        check.approve=false
+        check.reject=true
+
+        let response = await check.save()
+
+        // distinct and approved data 
+        const userDataObj = new UserDetails({
+            name: check.name,
+            email: check.email,
+            companyName: check.companyName,
+            linkedinUrl: check.linkedinUrl,
+            batchYear: check.batchYear,
+            imageUrl: check.imageUrl,
+            updated: Date.now(),
+            approve: false,
+            reject:true
         })
 
         let resss = await userDataObj.save()
