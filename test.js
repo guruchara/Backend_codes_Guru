@@ -75,7 +75,6 @@ app.post('/addUserInfo', upload.single('image'), async (req, res) => {
 
     const dataRes = await userDataObj.save();
 
-    if (dataRes) {
         res.json({ message: 'success' })
         return
     }
@@ -138,6 +137,8 @@ app.post('/firstTimeUsers', upload.single('image'), async (req, res) => {
 
 
 
+
+
 app.post('/editUserInfo', upload.single('image'), async (req, res) => {
 
     const { email, companyName, url, name, batchYear } = req.body;
@@ -183,7 +184,7 @@ app.get('/getPrivateData', async (req, res) => {
             console.log("error", err)
         }
         else {
-            res.json({ data: datas, message: 'successfully hit' })
+            res.json({ data: datas || [], message: 'successfully hit' })
         }
     })
 })
@@ -198,13 +199,14 @@ app.post('/editPrivate', async (req, res) => {
 
     if (req.body.approve) {
         const check = await firstTImeUserDetails.findOne({ email: email });
-        console.log("check203clea", check)
+        console.log("check202", check)
 
         if (!check) {
             return
         }
-        check.approve=true
 
+        check.approve=true;
+        
         let response = await check.save()
         // console.log("response206", response)
 
@@ -222,7 +224,22 @@ app.post('/editPrivate', async (req, res) => {
 
         let resss = await userDataObj.save()
         console.log("resss", resss)
+
+        // const result = await UserDetails.findOne({ email: email });
+
+        // const result = await firstTImeUserDetails.findOne({ email: email });
+
+        // result.approve = req.body.approve || false
+        // console.log("resut223",result.approve)
+        // const ans = await result.save();
+        
     }
+    // const result = await UserDetails.findOne({ email: email });
+    // result.approve = req.body.approve || false
+    // const ans = await result.save();
+
+
+
 
     UserDetails.find({}, function (err, datas) {
 
