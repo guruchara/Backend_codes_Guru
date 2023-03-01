@@ -23,7 +23,7 @@ app.use('/uploads', express.static('uploads'))
 
 const studentInfo = new mongoose.Schema({
     name: String,
-    email:String,
+    email: String,
     linkedinUrl: {
         type: String,
         validate: {
@@ -38,7 +38,7 @@ const studentInfo = new mongoose.Schema({
     imageUrl: String,
     updated: { type: Date, default: Date.now() },
     approve: Boolean,
-    reject:Boolean
+    reject: Boolean
 })
 
 const UserDetails = mongoose.model('userDetails', studentInfo)
@@ -72,7 +72,7 @@ app.post('/addUserInfo', upload.single('image'), async (req, res) => {
         imageUrl: imgUrl,
         updated: Date.now(),
         approve: false,
-        reject:false
+        reject: false
     })
 
     const dataRes = await userDataObj.save();
@@ -89,7 +89,7 @@ app.post('/addUserInfo', upload.single('image'), async (req, res) => {
 
 const firstTimeUser = new mongoose.Schema({
     name: String,
-    email:String,
+    email: String,
     linkedinUrl: {
         type: String,
         validate: {
@@ -104,7 +104,21 @@ const firstTimeUser = new mongoose.Schema({
     imageUrl: String,
     updated: { type: Date, default: Date.now() },
     approve: Boolean,
-    reject:Boolean
+    reject: Boolean
+})
+
+const careerInfo = new mongoose.Schema({
+    companyName: String,
+    jobUrl: {
+        type: String,
+        validate: {
+            validator: function (value) {
+                return /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(value);
+            },
+            message: 'Invalid URL'
+        },
+    },
+    email: String
 })
 
 const firstTImeUserDetails = mongoose.model('firstTImeUserDetails', firstTimeUser)
@@ -122,7 +136,7 @@ app.post('/firstTimeUsers', upload.single('image'), async (req, res) => {
         imageUrl: imgUrl,
         updated: Date.now(),
         approve: false,
-        reject:false
+        reject: false
     })
 
     const dataRes = await firstUserObj.save();
@@ -190,7 +204,7 @@ app.post('/editPrivate', async (req, res) => {
         if (!check) {
             return
         }
-        check.approve=true
+        check.approve = true
 
         let response = await check.save()
 
@@ -204,24 +218,23 @@ app.post('/editPrivate', async (req, res) => {
             imageUrl: check.imageUrl,
             updated: Date.now(),
             approve: true,
-            reject:false
+            reject: false
         })
 
         let resss = await userDataObj.save()
     }
 
-    else
-    {
+    else {
         const check = await firstTImeUserDetails.findOne({ email: email });
 
         if (!check) {
             return
         }
-        check.approve=false
-        check.reject=true
+        check.approve = false
+        check.reject = true
 
         let response = await check.save()
-// no need to save this data in  our main db 
+        // no need to save this data in  our main db 
         // distinct and approved data 
         // const userDataObj = new UserDetails({
         //     name: check.name,
@@ -246,6 +259,39 @@ app.post('/editPrivate', async (req, res) => {
         else {
             console.log("privateUpdateData", datas)
             res.json({ data: datas, message: 'successfully Hitted' })
+        }
+    })
+})
+const careerData = mongoose.model('careerData', careerInfo)
+
+app.post('/addCareer', async (req, res) => {
+
+    const ans = req.body
+    console.log("inside 255", req.body)
+
+    const careerDataObj = new careerData({
+        companyName: req.body.companyName,
+        jobUrl: req.body.link,
+        email: req.body.email
+    })
+
+    const result = await careerDataObj.save();
+
+    if (result) {
+        res.send({ message: 'success' })
+    }
+})
+
+app.get('/getCareerData', async (req, res) => {
+
+
+    careerData.find({}, function (err, datas) {
+
+        if (err) {
+            console.log("error", err)
+        }
+        else {
+            res.json({ data: datas, message: 'successfully hit' })
         }
     })
 })
