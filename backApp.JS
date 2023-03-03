@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const multer = require('multer');  // used for storing image 
 const upload = multer({ dest: 'uploads/' });
+const imgbbUploader = require("imgbb-uploader");
 
 app.use('/uploads', express.static('uploads'))
 
@@ -30,12 +31,22 @@ const appartmentQuery = new Parse.Query(Appartment)
 const port = process.env.PORT || 4000
 const fs = require('fs');
 
-
 app.post('/addStudent', upload.single('image'), async (req, res) => {
     try {
 
         const { email, companyName, url, name, batchYear } = req.body;
+
         const imgUrl = req?.file?.path || ''
+        console.log("imgUrl", imgUrl)
+
+        let response = {}
+        try {
+            response = await imgbbUploader("cbd44dd9b4da93cee7cea6b1c15ada92", imgUrl)
+        } catch (error) {
+            console.log("error", error)
+        }
+
+        console.log("response51111", response)
 
         console.log("====================================")
         console.log("RequestData\n", JSON.parse(JSON.stringify(req.body)))
@@ -46,9 +57,9 @@ app.post('/addStudent', upload.single('image'), async (req, res) => {
             email: email,
             companyName: companyName,
             linkedinUrl: url,
-            // batchYear: batchYear,
-            imageUrl: imgUrl,
-            // updated: Date.now(),
+            batchYear: parseInt(batchYear),
+            imageUrl: response.url || '',
+            // updated: Date.parse(Date.now()),
             approve: false,
             reject: false
         })
@@ -56,9 +67,8 @@ app.post('/addStudent', upload.single('image'), async (req, res) => {
         const dataRes = await userDataObj.save();
         console.log("dataRes57", dataRes)
 
-        // appartmentQuery.find().then((obj => res.json(obj))).catch((e) => res.json(e))
 
-        return res.json({ message: "sucess true", res: req.body })
+        return res.json({ message: "sucess true", res: dataRes })
 
     } catch (error) {
         console.log('error', error
